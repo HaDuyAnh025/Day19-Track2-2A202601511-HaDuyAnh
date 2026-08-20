@@ -2,12 +2,25 @@
 ## Two paths: lightweight (default, no Docker) and full Docker.
 
 VENV     := .venv
-PY       := $(VENV)/bin/python
-PIP      := $(VENV)/bin/pip
-JUPYTER  := $(VENV)/bin/jupyter
-JUPYTEXT := $(VENV)/bin/jupytext
-UVICORN  := $(VENV)/bin/uvicorn
-PYTEST   := $(VENV)/bin/pytest
+# Windows venvs (python -m venv on native Windows Python) use Scripts/ + .exe;
+# POSIX venvs (Linux/macOS/WSL) use bin/. Detect which layout exists.
+ifeq ($(wildcard $(VENV)/Scripts/python.exe),)
+BIN      := $(VENV)/bin
+PY       := $(BIN)/python
+PIP      := $(BIN)/pip
+JUPYTER  := $(BIN)/jupyter
+JUPYTEXT := $(BIN)/jupytext
+UVICORN  := $(BIN)/uvicorn
+PYTEST   := $(BIN)/pytest
+else
+BIN      := $(VENV)/Scripts
+PY       := $(BIN)/python.exe
+PIP      := $(BIN)/pip.exe
+JUPYTER  := $(BIN)/jupyter.exe
+JUPYTEXT := $(BIN)/jupytext.exe
+UVICORN  := $(BIN)/uvicorn.exe
+PYTEST   := $(BIN)/pytest.exe
+endif
 
 .DEFAULT_GOAL := help
 
@@ -33,7 +46,8 @@ api: ## [lite] Start FastAPI /search on http://localhost:8000
 
 lab: ## [lite] Open Jupyter Lab on http://localhost:8888
 	@$(JUPYTEXT) --to notebook --update notebooks/[0-9]*.py 2>/dev/null || true
-	@$(JUPYTER) lab --notebook-dir=notebooks --ServerApp.token='' --no-browser
+	@$(JUPYTER) lab --notebook-dir=notebooks --ServerApp.token='' --no-browser \
+		--MultiKernelManager.default_kernel_name=day19-lite
 
 benchmark: ## [both] Precision@10 (keyword/semantic/hybrid) + P99 latency table
 	@$(PY) scripts/benchmark.py
@@ -49,8 +63,9 @@ notebooks: ## [both] Execute ALL notebooks headless (what the grader runs)
 	@$(JUPYTEXT) --to notebook --update notebooks/[0-9]*.py >/dev/null 2>&1 || true
 	@for nb in notebooks/[0-9]*.ipynb; do \
 		printf '%-42s' "$$nb"; \
-		PATH="$(PWD)/$(VENV)/bin:$$PATH" $(VENV)/bin/jupyter nbconvert --to notebook \
+		$(JUPYTER) nbconvert --to notebook \
 			--execute --inplace "$$nb" --ExecutePreprocessor.timeout=900 \
+			--ExecutePreprocessor.kernel_name=day19-lite \
 			>/dev/null 2>&1 && echo PASS || echo FAIL; \
 	done
 
