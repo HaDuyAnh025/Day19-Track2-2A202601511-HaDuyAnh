@@ -10,7 +10,7 @@
 
 > Trên golden set 50 queries, mode nào thắng ở loại query nào (`exact` /
 > `paraphrase` / `mixed`), và tại sao? Khi nào bạn **không** dùng hybrid
-> (i.e. khi nào pure BM25 hoặc pure vector là lựa chọn đúng)?
+> (i.e. khi nào pure BM25 hoặc pure vector là lựa chọn đúng)? 
 
 Kết quả đo trên golden set (Precision@10 trung bình): Keyword 77.8%, Semantic
 73.2%, Hybrid 78.6%. Chia theo loại query: ở `exact` (15 câu), Keyword và
