@@ -64,7 +64,7 @@ notebooks: ## [both] Execute ALL notebooks headless (what the grader runs)
 	@for nb in notebooks/[0-9]*.ipynb; do \
 		printf '%-42s' "$$nb"; \
 		$(JUPYTER) nbconvert --to notebook \
-			--execute --inplace "$$nb" --ExecutePreprocessor.timeout=900 \
+			--execute --inplace "$$nb" --ExecutePreprocessor.timeout=1800 \
 			--ExecutePreprocessor.kernel_name=day19-lite \
 			>/dev/null 2>&1 && echo PASS || echo FAIL; \
 	done
